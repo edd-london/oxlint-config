@@ -1,0 +1,67 @@
+{
+  "name": "@eddlondon/oxlint-config",
+  "version": "1.0.0",
+  "description": "EDD London's shared oxlint and oxfmt configuration: the oxlint version of @eddlondon/eslint-config-react.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./index.json": "./index.json",
+    "./oxfmt": "./oxfmt.js",
+    "./oxfmt.json": "./oxfmt.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "index.json",
+    "oxfmt.js",
+    "oxfmt.json",
+    "README.md"
+  ],
+  "keywords": [
+    "oxlint",
+    "oxfmt",
+    "oxc",
+    "config",
+    "EDD London"
+  ],
+  "author": {
+    "name": "EDD London"
+  },
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edd-london/oxlint-config.git"
+  },
+  "scripts": {
+    "lint": "oxlint -c index.json fixtures/pass",
+    "lint:fail": "oxlint -c index.json fixtures/fail",
+    "format:check": "oxfmt -c oxfmt.json --check fixtures/pass",
+    "test": "node test.js",
+    "prepublishOnly": "npm test",
+    "push": "npm version patch && git push --follow-tags",
+    "push-patch": "npm version patch --force && git push --follow-tags",
+    "push-minor": "npm version minor && git push --follow-tags",
+    "push-major": "npm version major && git push --follow-tags"
+  },
+  "peerDependencies": {
+    "oxfmt": ">=0.72.0",
+    "oxlint": ">=1.87.0",
+    "oxlint-tsgolint": ">=7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "oxfmt": {
+      "optional": true
+    },
+    "oxlint-tsgolint": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
