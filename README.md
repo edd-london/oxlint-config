@@ -23,11 +23,11 @@ yarn add -D oxlint oxfmt @eddlondon/oxlint-config
 
 ## Entries
 
-| Entry | Contents | Use for |
-| --- | --- | --- |
-| `@eddlondon/oxlint-config/base` | eslint, typescript, unicorn and import rules | Node services, libraries, anything without JSX |
-| `@eddlondon/oxlint-config/react` | `base` plus react, react-hooks and jsx-a11y rules | React apps and component libraries |
-| `@eddlondon/oxlint-config/oxfmt` | formatter settings | every project |
+| Entry                            | Contents                                          | Use for                                        |
+| -------------------------------- | ------------------------------------------------- | ---------------------------------------------- |
+| `@eddlondon/oxlint-config/base`  | eslint, typescript, unicorn and import rules      | Node services, libraries, anything without JSX |
+| `@eddlondon/oxlint-config/react` | `base` plus react, react-hooks and jsx-a11y rules | React apps and component libraries             |
+| `@eddlondon/oxlint-config/oxfmt` | formatter settings                                | every project                                  |
 
 Each entry also has a `.json` twin (`base.json`, `react.json`, `oxfmt.json`) for projects on JSON config files.
 
@@ -36,8 +36,8 @@ Each entry also has a `.json` twin (`base.json`, `react.json`, `oxfmt.json`) for
 ### Linting with `oxlint.config.ts` (recommended)
 
 ```ts
-import { defineConfig } from 'oxlint';
 import react from '@eddlondon/oxlint-config/react';
+import { defineConfig } from 'oxlint';
 
 export default defineConfig({
   extends: [react],
@@ -56,13 +56,44 @@ The package ships no lint `ignorePatterns`. oxlint only honours `ignorePatterns`
 ```ts
 export default defineConfig({
   extends: [react],
-  ignorePatterns: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/generated/**'],
+  ignorePatterns: [
+    '**/node_modules/**',
+    '**/dist/**',
+    '**/build/**',
+    '**/generated/**',
+  ],
 });
 ```
 
 oxlint skips files listed in a `.gitignore` it finds, which usually covers `node_modules`, but keep it in the list so a checkout without `.gitignore` behaves the same.
 
-In a monorepo, the root config extends `base` and each React app or library has its own `oxlint.config.ts` extending the root plus `react`, the same way oxlint's nested configs work. Each nested config repeats the `ignorePatterns` it needs, since they are not inherited (see Ignores).
+### Monorepos
+
+The root config extends `base` and each React app or library has its own `oxlint.config.ts` extending the root plus `react`, the same way oxlint's nested configs work. Each nested config repeats the `ignorePatterns` it needs, since they are not inherited.
+
+```ts
+import base from '@eddlondon/oxlint-config/base';
+// oxlint.config.ts at the repo root
+import { defineConfig } from 'oxlint';
+
+export default defineConfig({
+  extends: [base],
+  ignorePatterns: ['**/node_modules/**', '**/dist/**', '**/generated/**'],
+});
+```
+
+```ts
+import react from '@eddlondon/oxlint-config/react';
+// apps/web/oxlint.config.ts
+import { defineConfig } from 'oxlint';
+
+import root from '../../oxlint.config.ts';
+
+export default defineConfig({
+  extends: [root, react],
+  ignorePatterns: ['.next/**', 'storybook-static/**'],
+});
+```
 
 ### Linting with `.oxlintrc.json`
 
@@ -72,17 +103,25 @@ oxlint's JSON `extends` takes file paths, not package names, so point it at the 
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "extends": ["./node_modules/@eddlondon/oxlint-config/react.json"],
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/generated/**"
+  ],
   "rules": {}
 }
 ```
+
+The same ignore rule applies: declare `ignorePatterns` in this file, they are not read from the extended one.
 
 ### Formatting
 
 oxfmt has no `extends`. Spread the config object in `oxfmt.config.ts` and add your project's settings after it:
 
 ```ts
-import { defineConfig } from 'oxfmt';
 import edd from '@eddlondon/oxlint-config/oxfmt';
+import { defineConfig } from 'oxfmt';
 
 export default defineConfig({
   ...edd,
@@ -109,7 +148,27 @@ Type-aware linting needs `oxlint-tsgolint` installed in the project. oxlint only
 
 ### Editor
 
-Install the [oxc VS Code extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode) and disable the ESLint and Prettier extensions for the workspace.
+Install the [oxc VS Code extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode) and disable the ESLint and Prettier extensions for the workspace. In `.vscode/settings.json`:
+
+```json
+{
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "eslint.enable": false,
+  "prettier.enable": false
+}
+```
+
+## Migrating from `@eddlondon/eslint-config-react`
+
+1. Remove `eslint`, `@eslint/js`, `typescript-eslint`, `prettier`, `@eddlondon/eslint-config-react` and any ESLint plugins the project added. Delete `eslint.config.*` and the Prettier config file.
+2. Install `oxlint`, `oxfmt` and this package. Add `oxlint-tsgolint` if you want type-aware rules.
+3. Create `oxlint.config.ts` and `oxfmt.config.ts` as shown above. Carry over the project's own overrides, ignores and framework plugins. Project-specific rules the ESLint config set locally stay local.
+4. Replace the lint and format scripts, and update lint-staged, lefthook or similar hooks to call `oxlint` and `oxfmt --check` on staged files.
+5. Run `oxfmt` once and commit the result on its own. Expect every file with imports to change, because `sortImports` groups them differently from `import/order`, and `package.json` keys to be reordered by `sortPackageJson`. This commit is whitespace and ordering only.
+6. Run `oxlint`. Errors should match what ESLint reported before. New warnings come from the additions listed under "What is in the config"; `react/jsx-curly-brace-presence` is usually the largest group and `oxlint --fix` clears it.
+
+Things ESLint did that oxlint does not: MDX linting, Storybook rules (unless you enable oxlint's alpha `jsPlugins`), Nx module boundaries, and JSON, YAML or Markdown rules. Keep a slim ESLint config for those if the project needs them, as nexus does.
 
 ## What is in the config
 
@@ -117,30 +176,30 @@ Install the [oxc VS Code extension](https://marketplace.visualstudio.com/items?i
 
 Translated from `@eddlondon/eslint-config-react` 5 with `@oxlint/migrate`, pinned to the plugin versions that package declares, then checked line by line. One module per plugin under `src/plugins`, composed into the two entries.
 
-| ESLint source | oxlint module |
-| --- | --- |
-| `@eslint/js` recommended | `eslint`: the same core rules, listed individually |
-| `typescript-eslint` recommended | `typescript`: the same `typescript/*` rules, plus its `*.ts, *.tsx, *.mts, *.cts` override that turns off checks TypeScript already does, enables `no-var`, `prefer-const`, `prefer-rest-params`, `prefer-spread`, and `consistent-type-imports` |
-| `eslint-plugin-unicorn` 61 recommended | `unicorn`: the same rules; `no-null` off; `filename-case` kebab or pascal; `catch-error-name` must be `exception`; `no-useless-undefined` with `checkArguments: false` |
-| `import/no-cycle` | `import` |
-| `eslint-plugin-react` recommended, `react-hooks` 5 recommended, `jsx-a11y` recommended | `react`: the same rules on `*.jsx, *.tsx`; hooks rules on all script files; `react-in-jsx-scope` off |
-| global ignores | not shipped, see Ignores above |
+| ESLint source                                                                          | oxlint module                                                                                                                                                                                                                                    |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@eslint/js` recommended                                                               | `eslint`: the same core rules, listed individually                                                                                                                                                                                               |
+| `typescript-eslint` recommended                                                        | `typescript`: the same `typescript/*` rules, plus its `*.ts, *.tsx, *.mts, *.cts` override that turns off checks TypeScript already does, enables `no-var`, `prefer-const`, `prefer-rest-params`, `prefer-spread`, and `consistent-type-imports` |
+| `eslint-plugin-unicorn` 61 recommended                                                 | `unicorn`: the same rules; `no-null` off; `filename-case` kebab or pascal; `catch-error-name` must be `exception`; `no-useless-undefined` with `checkArguments: false`                                                                           |
+| `import/no-cycle`                                                                      | `import`                                                                                                                                                                                                                                         |
+| `eslint-plugin-react` recommended, `react-hooks` 5 recommended, `jsx-a11y` recommended | `react`: the same rules on `*.jsx, *.tsx`; hooks rules on all script files; `react-in-jsx-scope` off                                                                                                                                             |
+| global ignores                                                                         | not shipped, see Ignores above                                                                                                                                                                                                                   |
 
 `categories.correctness` is set to `off` so that only the listed rules run. This keeps the rule set identical to the ESLint package instead of picking up oxlint's own defaults.
 
 Additions beyond the ESLint package, taken from EDD projects already on oxlint where every project had made the same choice or the rule is uncontroversial:
 
-| Entry | Addition | Severity |
-| --- | --- | --- |
-| base | `no-unused-vars` ignores `_`-prefixed names and rest siblings | error (options only) |
-| base | `no-unassigned-vars`, `preserve-caught-error` (`@eslint/js` 10 recommended) | error, warn |
-| base | `no-useless-constructor` | warn |
-| base | `typescript/ban-ts-comment` requires a description of 10+ characters | error (options only) |
-| base | `import/no-duplicates`, `import/no-named-as-default` | warn |
-| base | `*.cjs` and `*.config.js`: `prefer-module`, `prefer-export-from`, `no-require-imports` off | override |
-| react | `react/void-dom-elements-no-children` | error |
-| react | `react/jsx-no-script-url`, `react/iframe-missing-sandbox`, `react/no-unsafe` | warn |
-| react | `react/no-array-index-key`, `react/no-danger`, `react/jsx-curly-brace-presence` | warn |
+| Entry | Addition                                                                                   | Severity             |
+| ----- | ------------------------------------------------------------------------------------------ | -------------------- |
+| base  | `no-unused-vars` ignores `_`-prefixed names and rest siblings                              | error (options only) |
+| base  | `no-unassigned-vars`, `preserve-caught-error` (`@eslint/js` 10 recommended)                | error, warn          |
+| base  | `no-useless-constructor`                                                                   | warn                 |
+| base  | `typescript/ban-ts-comment` requires a description of 10+ characters                       | error (options only) |
+| base  | `import/no-duplicates`, `import/no-named-as-default`                                       | warn                 |
+| base  | `*.cjs` and `*.config.js`: `prefer-module`, `prefer-export-from`, `no-require-imports` off | override             |
+| react | `react/void-dom-elements-no-children`                                                      | error                |
+| react | `react/jsx-no-script-url`, `react/iframe-missing-sandbox`, `react/no-unsafe`               | warn                 |
+| react | `react/no-array-index-key`, `react/no-danger`, `react/jsx-curly-brace-presence`            | warn                 |
 
 Not carried over:
 
