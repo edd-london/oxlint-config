@@ -1,25 +1,41 @@
 {
-  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxfmt/configuration_schema.json",
   "printWidth": 80,
   "tabWidth": 2,
-  "useTabs": false,
   "semi": true,
   "singleQuote": true,
   "trailingComma": "all",
   "insertFinalNewline": true,
-  "sortPackageJson": false,
+  "sortPackageJson": true,
   "sortImports": {
     "newlinesBetween": true,
     "groups": [
       "value-builtin",
       "value-external",
-      ["value-internal", "type-internal"],
-      ["value-parent", "type-parent"],
-      ["value-sibling", "type-sibling"],
-      ["value-index", "type-index"],
+      [
+        "value-internal",
+        "type-internal"
+      ],
+      [
+        "value-parent",
+        "type-parent"
+      ],
+      [
+        "value-sibling",
+        "type-sibling"
+      ],
+      [
+        "value-index",
+        "type-index"
+      ],
       "type-import",
       "unknown"
     ]
   },
-  "ignorePatterns": ["**/node_modules/**", "**/dist/**", "**/build/**"]
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/generated/**"
+  ]
 }

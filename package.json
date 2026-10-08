@@ -3,18 +3,28 @@
   "version": "1.0.0",
   "description": "EDD London's shared oxlint and oxfmt configuration: the oxlint version of @eddlondon/eslint-config-react.",
   "type": "module",
-  "main": "index.js",
   "exports": {
-    ".": "./index.js",
-    "./index.json": "./index.json",
-    "./oxfmt": "./oxfmt.js",
+    "./base": {
+      "types": "./dist/base.d.ts",
+      "default": "./dist/base.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "default": "./dist/react.js"
+    },
+    "./oxfmt": {
+      "types": "./dist/oxfmt.d.ts",
+      "default": "./dist/oxfmt.js"
+    },
+    "./base.json": "./base.json",
+    "./react.json": "./react.json",
     "./oxfmt.json": "./oxfmt.json",
     "./package.json": "./package.json"
   },
   "files": [
-    "index.js",
-    "index.json",
-    "oxfmt.js",
+    "dist",
+    "base.json",
+    "react.json",
     "oxfmt.json",
     "README.md"
   ],
@@ -34,10 +44,11 @@
     "url": "https://github.com/edd-london/oxlint-config.git"
   },
   "scripts": {
-    "lint": "oxlint -c index.json fixtures/pass",
-    "lint:fail": "oxlint -c index.json fixtures/fail",
-    "format:check": "oxfmt -c oxfmt.json --check fixtures/pass",
-    "test": "node test.js",
+    "build": "tsc -p tsconfig.json && node scripts/generate-json.mjs",
+    "lint": "oxlint -c base.json src scripts test.js",
+    "format": "oxfmt -c oxfmt.json src scripts test.js fixtures/pass",
+    "format:check": "oxfmt -c oxfmt.json --check src scripts test.js fixtures/pass",
+    "test": "npm run build && node test.js",
     "prepublishOnly": "npm test",
     "push": "npm version patch && git push --follow-tags",
     "push-patch": "npm version patch --force && git push --follow-tags",
@@ -59,7 +70,8 @@
   },
   "devDependencies": {
     "oxfmt": "^0.72.0",
-    "oxlint": "^1.87.0"
+    "oxlint": "^1.87.0",
+    "typescript": "^5.9.0"
   },
   "engines": {
     "node": ">=20"

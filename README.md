@@ -1,6 +1,6 @@
 # EDD oxlint Config
 
-EDD London's shared [oxlint](https://oxc.rs/docs/guide/usage/linter.html) and [oxfmt](https://oxc.rs/docs/guide/usage/formatter.html) configuration. It is the oxlint version of [`@eddlondon/eslint-config-react`](https://www.npmjs.com/package/@eddlondon/eslint-config-react) 5: the same rules and the same decisions, translated one to one, with nothing project-specific added.
+EDD London's shared [oxlint](https://oxc.rs/docs/guide/usage/linter.html) and [oxfmt](https://oxc.rs/docs/guide/usage/formatter.html) configuration. It is the oxlint version of [`@eddlondon/eslint-config-react`](https://www.npmjs.com/package/@eddlondon/eslint-config-react) 5: the same rules and decisions, translated one to one, split into a framework-free `base` entry and a `react` entry that builds on it.
 
 [https://www.npmjs.com/package/@eddlondon/oxlint-config](https://www.npmjs.com/package/@eddlondon/oxlint-config)
 
@@ -9,7 +9,7 @@ EDD London's shared [oxlint](https://oxc.rs/docs/guide/usage/linter.html) and [o
 - oxlint 1.87+
 - oxfmt 0.72+ (optional, for formatting)
 - oxlint-tsgolint 7+ (optional, for type-aware rules)
-- Node 20+
+- Node 20+ (22.18+ to use `oxlint.config.ts`)
 
 ## Installation
 
@@ -21,41 +21,51 @@ pnpm add -D oxlint oxfmt @eddlondon/oxlint-config
 yarn add -D oxlint oxfmt @eddlondon/oxlint-config
 ```
 
+## Entries
+
+| Entry | Contents | Use for |
+| --- | --- | --- |
+| `@eddlondon/oxlint-config/base` | eslint, typescript, unicorn and import rules | Node services, libraries, anything without JSX |
+| `@eddlondon/oxlint-config/react` | `base` plus react, react-hooks and jsx-a11y rules | React apps and component libraries |
+| `@eddlondon/oxlint-config/oxfmt` | formatter settings | every project |
+
+Each entry also has a `.json` twin (`base.json`, `react.json`, `oxfmt.json`) for projects on JSON config files.
+
 ## Usage
 
-### Linting with `.oxlintrc.json`
-
-oxlint's JSON `extends` takes file paths, not package names, so point it at the file inside `node_modules`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "extends": ["./node_modules/@eddlondon/oxlint-config/index.json"],
-  "rules": {
-    // project overrides go here
-  }
-}
-```
-
-### Linting with `oxlint.config.ts`
-
-Needs the Node-based `oxlint` package and Node 22.18+. Also the route for Yarn PnP projects, which have no `node_modules` folder.
+### Linting with `oxlint.config.ts` (recommended)
 
 ```ts
 import { defineConfig } from 'oxlint';
-import edd from '@eddlondon/oxlint-config';
+import react from '@eddlondon/oxlint-config/react';
 
 export default defineConfig({
-  extends: [edd],
+  extends: [react],
   rules: {
     // project overrides go here
   },
 });
 ```
 
+Use `base` instead of `react` for a project without JSX. Needs the Node-based `oxlint` package and Node 22.18+. This is also the route for Yarn PnP projects, which have no `node_modules` folder.
+
+In a monorepo, the root config extends `base` and each React app or library has its own `oxlint.config.ts` extending the root plus `react`, the same way oxlint's nested configs work.
+
+### Linting with `.oxlintrc.json`
+
+oxlint's JSON `extends` takes file paths, not package names, so point it at the generated file inside `node_modules`:
+
+```json
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["./node_modules/@eddlondon/oxlint-config/react.json"],
+  "rules": {}
+}
+```
+
 ### Formatting
 
-oxfmt has no `extends`. Import the config object in `oxfmt.config.ts` and spread it, then add your project's settings after it:
+oxfmt has no `extends`. Spread the config object in `oxfmt.config.ts` and add your project's settings after it:
 
 ```ts
 import { defineConfig } from 'oxfmt';
@@ -67,7 +77,7 @@ export default defineConfig({
 });
 ```
 
-Or copy `node_modules/@eddlondon/oxlint-config/oxfmt.json` to `.oxfmtrc.json` and edit it. The `$schema` entry in that file points at `./node_modules/oxfmt/configuration_schema.json`, which resolves correctly from a project root.
+Or copy `node_modules/@eddlondon/oxlint-config/oxfmt.json` to `.oxfmtrc.json` and edit it.
 
 ### Scripts
 
@@ -92,20 +102,16 @@ Install the [oxc VS Code extension](https://marketplace.visualstudio.com/items?i
 
 ### Lint rules
 
-Translated from `@eddlondon/eslint-config-react` 5 with `@oxlint/migrate`, pinned to the plugin versions that package declares, then checked line by line.
+Translated from `@eddlondon/eslint-config-react` 5 with `@oxlint/migrate`, pinned to the plugin versions that package declares, then checked line by line. One module per plugin under `src/plugins`, composed into the two entries.
 
-| ESLint source | oxlint |
+| ESLint source | oxlint module |
 | --- | --- |
-| `@eslint/js` recommended | the same `eslint/*` rules, listed individually |
-| `typescript-eslint` recommended | the same `typescript/*` rules, plus its `*.ts, *.tsx, *.mts, *.cts` override that turns off checks TypeScript already does and enables `no-var`, `prefer-const`, `prefer-rest-params`, `prefer-spread` |
-| `eslint-plugin-react` recommended | the same `react/*` rules; `react/react-in-jsx-scope` off |
-| `eslint-plugin-react-hooks` 5 recommended | `react/rules-of-hooks` error, `react/exhaustive-deps` warn |
-| `eslint-plugin-jsx-a11y` recommended | the same `jsx-a11y/*` rules |
-| `eslint-plugin-unicorn` 61 recommended | the same `unicorn/*` rules; `no-null` off; `filename-case` kebab or pascal; `catch-error-name` must be `exception`; `no-useless-undefined` with `checkArguments: false`; `prevent-abbreviations` was already off |
-| `import/no-cycle` | `import/no-cycle` error |
-| `array-callback-return` | `array-callback-return` with `allowImplicit: true` |
-| `@typescript-eslint/consistent-type-imports` on `*.ts, *.tsx` | `typescript/consistent-type-imports` in the TypeScript override |
-| global ignores | `ignorePatterns` for `node_modules`, `dist`, `build` |
+| `@eslint/js` recommended | `eslint`: the same core rules, listed individually |
+| `typescript-eslint` recommended | `typescript`: the same `typescript/*` rules, plus its `*.ts, *.tsx, *.mts, *.cts` override that turns off checks TypeScript already does, enables `no-var`, `prefer-const`, `prefer-rest-params`, `prefer-spread`, and `consistent-type-imports` |
+| `eslint-plugin-unicorn` 61 recommended | `unicorn`: the same rules; `no-null` off; `filename-case` kebab or pascal; `catch-error-name` must be `exception`; `no-useless-undefined` with `checkArguments: false` |
+| `import/no-cycle` | `import` |
+| `eslint-plugin-react` recommended, `react-hooks` 5 recommended, `jsx-a11y` recommended | `react`: the same rules on `*.jsx, *.tsx`; hooks rules on all script files; `react-in-jsx-scope` off |
+| global ignores | `ignorePatterns` for `node_modules`, `dist`, `build`, `generated` |
 
 `categories.correctness` is set to `off` so that only the listed rules run. This keeps the rule set identical to the ESLint package instead of picking up oxlint's own defaults.
 
@@ -115,18 +121,17 @@ Not carried over:
 - `prettier/prettier` and `eslint-config-prettier`: oxfmt is the formatter now.
 - The MDX block: oxlint does not lint MDX.
 - The Storybook block: `eslint-plugin-storybook` only works through oxlint's `jsPlugins`, which is alpha. Add it in your project if you need it.
-- Rules the ESLint plugins mark as not applicable under oxlint (`no-dupe-args`, `no-octal`, `react/jsx-uses-react`, `react/jsx-uses-vars`, `react/no-deprecated`, `react/prop-types`): superseded by strict mode, TypeScript, or other rules.
+- Rules oxlint marks as not applicable (`no-dupe-args`, `no-octal`, `react/jsx-uses-react`, `react/jsx-uses-vars`, `react/no-deprecated`, `react/prop-types`): superseded by strict mode, TypeScript, or other rules.
 
 ### Formatter settings
 
-Prettier's defaults as the ESLint package used them, written out explicitly where oxfmt's own defaults differ:
+Prettier's defaults as the ESLint package used them, written out where oxfmt's own defaults differ:
 
-- `printWidth: 80`, `tabWidth: 2`, `semi: true`, `singleQuote: true`, `trailingComma: "all"`, `arrowParens` default (`always`)
-- `sortPackageJson: false` (oxfmt's default is on)
+- `printWidth: 80`, `tabWidth: 2`, `semi: true`, `singleQuote: true`, `trailingComma: "all"`
+- `sortPackageJson: true`
 - `sortImports` on, grouped like `import/order` with `newlines-between: always`: builtins, externals, internal, parent, sibling, index, then type-only imports
-- `endOfLine` left unset. oxfmt defaults to `lf` and has no `auto`. Set `crlf` in your project if you need it.
-
-Known oxfmt differences from Prettier 3 in JSON, YAML and CSS layout are not worked around here.
+- `useTabs` unset: oxfmt reads `indent_style` from your `.editorconfig`
+- `endOfLine` unset: oxfmt defaults to `lf` and has no `auto`; set `crlf` in your project if you need it
 
 ## Versioning
 
@@ -139,4 +144,4 @@ npm install
 npm test
 ```
 
-`npm test` checks that both JSON files parse, that `fixtures/pass` lints and formats clean, and that `fixtures/fail` trips each rule it is written to trip. It runs automatically before `npm publish`.
+`npm run build` compiles `src` to `dist` and generates the three JSON files. `npm test` builds, then checks that the JSON parses, that `fixtures/pass` lints and formats clean, that `fixtures/fail` trips each rule it is written to trip under `react`, that `base` reports no react or jsx-a11y rule, and that an `oxlint.config.ts` consumer of the compiled entry sees the same findings. It runs automatically before `npm publish`.
