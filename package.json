@@ -2,6 +2,28 @@
   "name": "@eddlondon/oxlint-config",
   "version": "1.0.0",
   "description": "EDD London's shared oxlint and oxfmt configuration: the oxlint version of @eddlondon/eslint-config-react.",
+  "keywords": [
+    "EDD London",
+    "config",
+    "oxc",
+    "oxfmt",
+    "oxlint"
+  ],
+  "license": "ISC",
+  "author": {
+    "name": "EDD London"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/edd-london/oxlint-config.git"
+  },
+  "files": [
+    "dist",
+    "base.json",
+    "react.json",
+    "oxfmt.json",
+    "README.md"
+  ],
   "type": "module",
   "exports": {
     "./base": {
@@ -21,27 +43,8 @@
     "./oxfmt.json": "./oxfmt.json",
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "base.json",
-    "react.json",
-    "oxfmt.json",
-    "README.md"
-  ],
-  "keywords": [
-    "oxlint",
-    "oxfmt",
-    "oxc",
-    "config",
-    "EDD London"
-  ],
-  "author": {
-    "name": "EDD London"
-  },
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/edd-london/oxlint-config.git"
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/generate-json.mjs",
@@ -55,6 +58,11 @@
     "push-minor": "npm version minor && git push --follow-tags",
     "push-major": "npm version major && git push --follow-tags"
   },
+  "devDependencies": {
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
+    "typescript": "^7.0.2"
+  },
   "peerDependencies": {
     "oxfmt": ">=0.72.0",
     "oxlint": ">=1.87.0",
@@ -67,11 +75,6 @@
     "oxlint-tsgolint": {
       "optional": true
     }
-  },
-  "devDependencies": {
-    "oxfmt": "^0.72.0",
-    "oxlint": "^1.87.0",
-    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=20"
