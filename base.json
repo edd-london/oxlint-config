@@ -345,11 +345,5 @@
   },
   "env": {
     "builtin": true
-  },
-  "ignorePatterns": [
-    "**/node_modules/**",
-    "**/dist/**",
-    "**/build/**",
-    "**/generated/**"
-  ]
+  }
 }

@@ -49,6 +49,17 @@ export default defineConfig({
 
 Use `base` instead of `react` for a project without JSX. Needs the Node-based `oxlint` package and Node 22.18+. This is also the route for Yarn PnP projects, which have no `node_modules` folder.
 
+### Ignores
+
+The package ships no lint `ignorePatterns`. oxlint resolves them relative to the file that declares them, so patterns inside `node_modules` would never match your tree. oxlint already honours `.gitignore`; add anything else in your root config:
+
+```ts
+export default defineConfig({
+  extends: [react],
+  ignorePatterns: ['**/dist/**', '**/build/**', '**/generated/**'],
+});
+```
+
 In a monorepo, the root config extends `base` and each React app or library has its own `oxlint.config.ts` extending the root plus `react`, the same way oxlint's nested configs work.
 
 ### Linting with `.oxlintrc.json`
@@ -111,7 +122,7 @@ Translated from `@eddlondon/eslint-config-react` 5 with `@oxlint/migrate`, pinne
 | `eslint-plugin-unicorn` 61 recommended | `unicorn`: the same rules; `no-null` off; `filename-case` kebab or pascal; `catch-error-name` must be `exception`; `no-useless-undefined` with `checkArguments: false` |
 | `import/no-cycle` | `import` |
 | `eslint-plugin-react` recommended, `react-hooks` 5 recommended, `jsx-a11y` recommended | `react`: the same rules on `*.jsx, *.tsx`; hooks rules on all script files; `react-in-jsx-scope` off |
-| global ignores | `ignorePatterns` for `node_modules`, `dist`, `build`, `generated` |
+| global ignores | not shipped, see Ignores above |
 
 `categories.correctness` is set to `off` so that only the listed rules run. This keeps the rule set identical to the ESLint package instead of picking up oxlint's own defaults.
 
@@ -136,6 +147,11 @@ Not carried over:
 - The MDX block: oxlint does not lint MDX.
 - The Storybook block: `eslint-plugin-storybook` only works through oxlint's `jsPlugins`, which is alpha. Add it in your project if you need it.
 - Rules oxlint marks as not applicable (`no-dupe-args`, `no-octal`, `react/jsx-uses-react`, `react/jsx-uses-vars`, `react/no-deprecated`, `react/prop-types`): superseded by strict mode, TypeScript, or other rules.
+
+Known divergences, where oxlint's implementation is stricter than the ESLint plugin on code the ESLint config accepted. Both are kept at the ESLint severity; override locally if they bite:
+
+- `unicorn/numeric-separators-style` reports "invalid group length" on fractional digits grouped in threes, such as `51.545_462_146`. The ESLint rule accepts that.
+- `react/display-name` reports components created with `forwardRef` or `memo` and assigned to a named `const`. The ESLint rule accepts that.
 
 ### Formatter settings
 

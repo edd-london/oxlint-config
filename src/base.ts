@@ -9,18 +9,16 @@ import unicorn from './plugins/unicorn.js';
 // @eddlondon/eslint-config-react 5. Every rule is listed explicitly and
 // `correctness` is off, so oxlint's own defaults never leak in.
 //
+// No `ignorePatterns` here on purpose: oxlint resolves them relative to the
+// file that declares them, so patterns shipped inside node_modules never match
+// the consumer's tree. Consumers set ignores in their own root config.
+//
 //   import { defineConfig } from 'oxlint';
 //   import base from '@eddlondon/oxlint-config/base';
 //   export default defineConfig({ extends: [base] });
 export default defineConfig({
   categories: { correctness: 'off' },
   env: { builtin: true },
-  ignorePatterns: [
-    '**/node_modules/**',
-    '**/dist/**',
-    '**/build/**',
-    '**/generated/**',
-  ],
   extends: [eslint, typescript, unicorn, importPlugin],
   overrides: [
     {
