@@ -1,10 +1,11 @@
-// Writes base.json, react.json and oxfmt.json from the compiled entries, for
+// Writes base.json, react.json, nextjs.json and oxfmt.json from the compiled entries, for
 // projects that use .oxlintrc.json / .oxfmtrc.json instead of a TypeScript
 // config. oxlint's JSON `extends` takes file paths only, so the object-based
 // `extends` chain is flattened here into one self-contained config per entry.
 import { writeFileSync } from 'node:fs';
 
 import base from '../dist/base.js';
+import nextjs from '../dist/nextjs.js';
 import oxfmt from '../dist/oxfmt.js';
 import react from '../dist/react.js';
 
@@ -61,5 +62,6 @@ const write = (file, data) =>
 
 write('base.json', tidy(flatten(base)));
 write('react.json', tidy(flatten(react)));
+write('nextjs.json', tidy(flatten(nextjs)));
 write('oxfmt.json', { $schema: OXFMT_SCHEMA, ...oxfmt });
-console.log('wrote base.json, react.json, oxfmt.json');
+console.log('wrote base.json, react.json, nextjs.json, oxfmt.json');

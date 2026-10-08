@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "EDD London's shared oxlint and oxfmt configuration: the oxlint version of @eddlondon/eslint-config-react.",
   "keywords": [
-    "EDD London",
     "config",
+    "EDD London",
+    "nextjs",
     "oxc",
     "oxfmt",
     "oxlint"
@@ -21,6 +22,7 @@
     "dist",
     "base.json",
     "react.json",
+    "nextjs.json",
     "oxfmt.json",
     "README.md"
   ],
@@ -34,12 +36,17 @@
       "types": "./dist/react.d.ts",
       "default": "./dist/react.js"
     },
+    "./nextjs": {
+      "types": "./dist/nextjs.d.ts",
+      "default": "./dist/nextjs.js"
+    },
     "./oxfmt": {
       "types": "./dist/oxfmt.d.ts",
       "default": "./dist/oxfmt.js"
     },
     "./base.json": "./base.json",
     "./react.json": "./react.json",
+    "./nextjs.json": "./nextjs.json",
     "./oxfmt.json": "./oxfmt.json",
     "./package.json": "./package.json"
   },

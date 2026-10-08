@@ -2,7 +2,8 @@
 //  1. The generated JSON files parse.
 //  2. fixtures/pass lints clean under `react` and formats clean under oxfmt.
 //  3. fixtures/fail reports every rule it is written to trip under `react`.
-//  4. `base` reports no react or jsx-a11y rule at all: the split holds.
+//  4. `base` reports no react or jsx-a11y rule at all: the split holds, and
+//     only `nextjs` reports nextjs rules.
 //  5. A TypeScript consumer (`oxlint.config.ts` extending the compiled entry)
 //     sees the same findings as the JSON twin.
 import { spawnSync } from 'node:child_process';
@@ -23,6 +24,12 @@ const expectedFailures = [
   'react/void-dom-elements-no-children',
   'react/no-array-index-key',
   'react/jsx-curly-brace-presence',
+];
+
+// Only the nextjs entry reports these; oxlint codes them as next(...).
+const expectedNextFailures = [
+  'next/no-img-element',
+  'next/no-sync-scripts',
 ];
 
 function run(command, args, cwd = process.cwd()) {
@@ -63,7 +70,7 @@ function reportedRules(output) {
   return rules;
 }
 
-for (const file of ['base.json', 'react.json', 'oxfmt.json']) {
+for (const file of ['base.json', 'react.json', 'nextjs.json', 'oxfmt.json']) {
   try {
     const parsed = JSON.parse(readFileSync(file, 'utf8'));
     check(true, `${file} is valid JSON`);
@@ -82,6 +89,13 @@ for (const file of ['base.json', 'react.json', 'oxfmt.json']) {
 
 const pass = run('npx', ['oxlint', '-c', 'react.json', 'fixtures/pass']);
 check(pass.code === 0, 'fixtures/pass lints clean under react', pass.output);
+
+const passNext = run('npx', ['oxlint', '-c', 'nextjs.json', 'fixtures/pass']);
+check(
+  passNext.code === 0,
+  'fixtures/pass lints clean under nextjs',
+  passNext.output,
+);
 
 const fmt = run('npx', [
   'oxfmt',
@@ -110,17 +124,43 @@ for (const rule of expectedFailures) {
     `reported: ${[...(reactFail ?? [])].join(', ')}`,
   );
 }
+const reactLeaked = [...(reactFail ?? [])].filter((rule) =>
+  rule.startsWith('next/'),
+);
+check(
+  reactLeaked.length === 0,
+  'react reports no nextjs rule',
+  `leaked: ${reactLeaked.join(', ')}`,
+);
+
+const nextFail = reportedRules(
+  run('npx', [
+    'oxlint',
+    '-c',
+    'nextjs.json',
+    '--format',
+    'json',
+    'fixtures/fail',
+  ]).output,
+);
+for (const rule of [...expectedFailures, ...expectedNextFailures]) {
+  check(
+    nextFail?.has(rule),
+    `nextjs reports ${rule}`,
+    `reported: ${[...(nextFail ?? [])].join(', ')}`,
+  );
+}
 
 const baseFail = reportedRules(
   run('npx', ['oxlint', '-c', 'base.json', '--format', 'json', 'fixtures/fail'])
     .output,
 );
 const leaked = [...(baseFail ?? [])].filter((rule) =>
-  /^(react|jsx-a11y)\//.test(rule),
+  /^(react|jsx-a11y|next)\//.test(rule),
 );
 check(
   leaked.length === 0,
-  'base reports no react or jsx-a11y rule',
+  'base reports no react, jsx-a11y or nextjs rule',
   `leaked: ${leaked.join(', ')}`,
 );
 for (const rule of expectedFailures.filter(

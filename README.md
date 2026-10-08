@@ -1,6 +1,6 @@
 # EDD oxlint Config
 
-EDD London's shared [oxlint](https://oxc.rs/docs/guide/usage/linter.html) and [oxfmt](https://oxc.rs/docs/guide/usage/formatter.html) configuration. It is the oxlint version of [`@eddlondon/eslint-config-react`](https://www.npmjs.com/package/@eddlondon/eslint-config-react) 5: the same rules and decisions, translated one to one, split into a framework-free `base` entry and a `react` entry that builds on it.
+EDD London's shared [oxlint](https://oxc.rs/docs/guide/usage/linter.html) and [oxfmt](https://oxc.rs/docs/guide/usage/formatter.html) configuration. It is the oxlint version of [`@eddlondon/eslint-config-react`](https://www.npmjs.com/package/@eddlondon/eslint-config-react) 5: the same rules and decisions, translated one to one, split into a framework-free `base` entry and a `react` entry that builds on it, plus a `nextjs` entry for Next.js apps.
 
 [https://www.npmjs.com/package/@eddlondon/oxlint-config](https://www.npmjs.com/package/@eddlondon/oxlint-config)
 
@@ -9,7 +9,7 @@ EDD London's shared [oxlint](https://oxc.rs/docs/guide/usage/linter.html) and [o
 - oxlint 1.87+
 - oxfmt 0.72+ (optional, for formatting)
 - oxlint-tsgolint 7+ (optional, for type-aware rules)
-- Node 20+ (22.18+ to use `oxlint.config.ts`)
+- Node 20+ (22.18+ to use `oxlint.config.mts`)
 
 ## Installation
 
@@ -21,19 +21,27 @@ pnpm add -D oxlint oxfmt @eddlondon/oxlint-config
 yarn add -D oxlint oxfmt @eddlondon/oxlint-config
 ```
 
+pnpm 11 and later refuse versions published less than 24 hours ago (`minimumReleaseAge`). To adopt a fresh release of this package straight away, exclude the scope in `pnpm-workspace.yaml`, or wait a day:
+
+```yaml
+minimumReleaseAgeExclude:
+  - '@eddlondon/*'
+```
+
 ## Entries
 
 | Entry                            | Contents                                          | Use for                                        |
 | -------------------------------- | ------------------------------------------------- | ---------------------------------------------- |
 | `@eddlondon/oxlint-config/base`  | eslint, typescript, unicorn and import rules      | Node services, libraries, anything without JSX |
 | `@eddlondon/oxlint-config/react` | `base` plus react, react-hooks and jsx-a11y rules | React apps and component libraries             |
+| `@eddlondon/oxlint-config/nextjs` | `react` plus oxlint's port of `@next/eslint-plugin-next` | Next.js apps                                   |
 | `@eddlondon/oxlint-config/oxfmt` | formatter settings                                | every project                                  |
 
-Each entry also has a `.json` twin (`base.json`, `react.json`, `oxfmt.json`) for projects on JSON config files.
+Each entry also has a `.json` twin (`base.json`, `react.json`, `nextjs.json`, `oxfmt.json`) for projects on JSON config files.
 
 ## Usage
 
-### Linting with `oxlint.config.ts` (recommended)
+### Linting with `oxlint.config.mts` (recommended)
 
 ```ts
 import react from '@eddlondon/oxlint-config/react';
@@ -42,12 +50,54 @@ import { defineConfig } from 'oxlint';
 export default defineConfig({
   extends: [react],
   rules: {
-    // project overrides go here
+    // rules the package does not set go here
   },
 });
 ```
 
-Use `base` instead of `react` for a project without JSX. Needs the Node-based `oxlint` package and Node 22.18+, and the project needs `"type": "module"` in its `package.json` so Node loads the config as an ES module; use `oxlint.config.mts` and `oxfmt.config.mts` instead if the project is CommonJS. This is also the route for Yarn PnP projects, which have no `node_modules` folder.
+Use `base` instead of `react` for a project without JSX, or `nextjs` for a Next.js app. Needs the Node-based `oxlint` package and Node 22.18+. This is also the route for Yarn PnP projects, which have no `node_modules` folder.
+
+Name the file `oxlint.config.mts` (and `oxfmt.config.mts`) unless the project already has `"type": "module"` in its `package.json`. The `.mts` form loads as an ES module everywhere; a plain `.ts` config in a CommonJS project prints Node's module-type warning on every run.
+
+### Changing a rule the package sets
+
+The package puts every rule inside an `overrides` block that also names its plugin, so that each entry stays self-contained. oxlint applies overrides after the root `rules`, which has two consequences for you:
+
+- A root-level `rules` entry cannot change a rule the package sets. Put the change in your own `overrides` block, which runs after the package's.
+- An override only sees the plugins it names itself. Add `plugins` to the block, or the rule is silently ignored.
+
+For example, to let `react/no-unknown-property` accept styled-jsx's `<style jsx global>` attributes:
+
+```ts
+export default defineConfig({
+  extends: [react],
+  overrides: [
+    {
+      files: ['**/*.{jsx,tsx}'],
+      plugins: ['react'],
+      rules: {
+        'react/no-unknown-property': ['error', { ignore: ['jsx', 'global'] }],
+      },
+    },
+  ],
+});
+```
+
+Rules the package does not set, such as a framework plugin's, go in the root `rules` as usual.
+
+### Next.js
+
+```ts
+import nextjs from '@eddlondon/oxlint-config/nextjs';
+import { defineConfig } from 'oxlint';
+
+export default defineConfig({
+  extends: [nextjs],
+  ignorePatterns: ['**/node_modules/**', '.next/**', 'out/**', 'next-env.d.ts'],
+});
+```
+
+`nextjs` is `react` plus the 21 rules of oxlint's built-in `nextjs` plugin at the severities of `@next/eslint-plugin-next`'s `recommended` and `core-web-vitals` presets. The package turns oxlint's rule categories off, so adding `plugins: ['nextjs']` yourself would enable nothing; this entry lists the rules. If the app uses styled-jsx, add the override from the previous section.
 
 ### Ignores
 
@@ -69,11 +119,11 @@ oxlint skips files listed in a `.gitignore` it finds, which usually covers `node
 
 ### Monorepos
 
-The root config extends `base` and each React app or library has its own `oxlint.config.ts` extending the root plus `react`, the same way oxlint's nested configs work. Each nested config repeats the `ignorePatterns` it needs, since they are not inherited.
+The root config extends `base` and each React app or library has its own `oxlint.config.mts` extending the root plus `react`, the same way oxlint's nested configs work. Each nested config repeats the `ignorePatterns` it needs, since they are not inherited.
 
 ```ts
 import base from '@eddlondon/oxlint-config/base';
-// oxlint.config.ts at the repo root
+// oxlint.config.mts at the repo root
 import { defineConfig } from 'oxlint';
 
 export default defineConfig({
@@ -84,10 +134,10 @@ export default defineConfig({
 
 ```ts
 import react from '@eddlondon/oxlint-config/react';
-// apps/web/oxlint.config.ts
+// apps/web/oxlint.config.mts
 import { defineConfig } from 'oxlint';
 
-import root from '../../oxlint.config.ts';
+import root from '../../oxlint.config.mts';
 
 export default defineConfig({
   extends: [root, react],
@@ -117,7 +167,7 @@ The same ignore rule applies: declare `ignorePatterns` in this file, they are no
 
 ### Formatting
 
-oxfmt has no `extends`. Spread the config object in `oxfmt.config.ts` and add your project's settings after it:
+oxfmt has no `extends`. Spread the config object in `oxfmt.config.mts` and add your project's settings after it:
 
 ```ts
 import edd from '@eddlondon/oxlint-config/oxfmt';
@@ -163,9 +213,9 @@ Install the [oxc VS Code extension](https://marketplace.visualstudio.com/items?i
 
 1. Remove `eslint`, `@eslint/js`, `typescript-eslint`, `prettier`, `@eddlondon/eslint-config-react` and any ESLint plugins the project added. Delete `eslint.config.*` and the Prettier config file.
 2. Install `oxlint`, `oxfmt` and this package. Add `oxlint-tsgolint` if you want type-aware rules.
-3. Create `oxlint.config.ts` and `oxfmt.config.ts` as shown above. Carry over the project's own overrides, ignores and framework plugins. Project-specific rules the ESLint config set locally stay local.
+3. Create `oxlint.config.mts` and `oxfmt.config.mts` as shown above. Carry over the project's own overrides, ignores and framework plugins. Project-specific rules the ESLint config set locally stay local.
 4. Replace the lint and format scripts, and update lint-staged, lefthook or similar hooks to call `oxlint` and `oxfmt --check` on staged files.
-5. Run `oxfmt` once and commit the result on its own. Expect every file with imports to change, because `sortImports` groups them differently from `import/order`, and `package.json` keys to be reordered by `sortPackageJson`. This commit is whitespace and ordering only.
+5. Run `oxfmt` once and commit the result on its own. Expect every file with imports to change, because `sortImports` groups them differently from `import/order`, and `package.json` keys to be reordered by `sortPackageJson`. oxfmt also formats CSS, YAML, JSON and Markdown, which Prettier was usually never pointed at, so pipeline and config files change too; nothing has gone wrong. Add file types you do not want formatted to `ignorePatterns` in `oxfmt.config.mts`. This commit is whitespace and ordering only.
 6. Run `oxlint`. Errors should match what ESLint reported before. New warnings come from the additions listed under "What is in the config"; `react/jsx-curly-brace-presence` is usually the largest group and `oxlint --fix` clears it.
 
 Things ESLint did that oxlint does not: MDX linting, Storybook rules (unless you enable oxlint's alpha `jsPlugins`), Nx module boundaries, and JSON, YAML or Markdown rules. Keep a slim ESLint config for those if the project needs them, as nexus does.
@@ -174,7 +224,7 @@ Things ESLint did that oxlint does not: MDX linting, Storybook rules (unless you
 
 ### Lint rules
 
-Translated from `@eddlondon/eslint-config-react` 5 with `@oxlint/migrate`, pinned to the plugin versions that package declares, then checked line by line. One module per plugin under `src/plugins`, composed into the two entries.
+Translated from `@eddlondon/eslint-config-react` 5 with `@oxlint/migrate`, pinned to the plugin versions that package declares, then checked line by line. One module per plugin under `src/plugins`, composed into the entries.
 
 | ESLint source                                                                          | oxlint module                                                                                                                                                                                                                                    |
 | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -184,6 +234,7 @@ Translated from `@eddlondon/eslint-config-react` 5 with `@oxlint/migrate`, pinne
 | `import/no-cycle`                                                                      | `import`                                                                                                                                                                                                                                         |
 | `eslint-plugin-react` recommended, `react-hooks` 5 recommended, `jsx-a11y` recommended | `react`: the same rules on `*.jsx, *.tsx`; hooks rules on all script files; `react-in-jsx-scope` off                                                                                                                                             |
 | global ignores                                                                         | not shipped, see Ignores above                                                                                                                                                                                                                   |
+| not in the ESLint package                                                              | `nextjs`: oxlint's port of `@next/eslint-plugin-next` at its `recommended` and `core-web-vitals` severities, only in the `nextjs` entry                                                                                                          |
 
 `categories.correctness` is set to `off` so that only the listed rules run. This keeps the rule set identical to the ESLint package instead of picking up oxlint's own defaults.
 
@@ -211,7 +262,7 @@ Not carried over:
 
 Known divergences, where oxlint's implementation is stricter than the ESLint plugin on code the ESLint config accepted. Both are set to `warn` instead of the ESLint package's `error` so a first lint run does not fail on working code. They will move to `error` in a major release once oxlint matches the ESLint plugins:
 
-- `unicorn/numeric-separators-style` reports "invalid group length" on fractional digits grouped in threes, such as `51.545_462_146`. The ESLint rule accepts that.
+- `unicorn/numeric-separators-style` reports "invalid group length" on fractional digits grouped in threes, such as `51.545_462_146`. The ESLint rule accepts that. oxlint accepts fractional digits with no separators at all, so writing `51.545462146` clears the warning.
 - `react/display-name` reports components created with `forwardRef` or `memo` and assigned to a named `const`. The ESLint rule accepts that.
 
 ### Formatter settings
@@ -236,4 +287,4 @@ npm install
 npm test
 ```
 
-`npm run build` compiles `src` to `dist` and generates the three JSON files. `npm test` builds, then checks that the JSON parses, that `fixtures/pass` lints and formats clean, that `fixtures/fail` trips each rule it is written to trip under `react`, that `base` reports no react or jsx-a11y rule, and that an `oxlint.config.ts` consumer of the compiled entry sees the same findings. It runs automatically before `npm publish`.
+`npm run build` compiles `src` to `dist` and generates the four JSON files. `npm test` builds, then checks that the JSON parses, that `fixtures/pass` lints and formats clean, that `fixtures/fail` trips each rule it is written to trip under `react` and `nextjs`, that `base` and `react` report no rule from a plugin they do not include, and that an `oxlint.config.ts` consumer of the compiled entry sees the same findings. It runs automatically before `npm publish`.
