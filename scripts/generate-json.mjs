@@ -28,9 +28,15 @@ function flatten(config) {
       categories: { ...acc.categories, ...c.categories },
       env: { ...acc.env, ...c.env },
       rules: { ...acc.rules, ...c.rules },
-      ignorePatterns: union(acc.ignorePatterns, c.ignorePatterns),
       overrides: [...(acc.overrides ?? []), ...(c.overrides ?? [])],
     };
+  }
+  // oxlint does not merge ignorePatterns from `extends`, so a shared config
+  // cannot carry them. Refuse to flatten one rather than ship it silently.
+  if (acc.ignorePatterns) {
+    throw new Error(
+      'ignorePatterns found in a lint entry; consumers must declare ignores themselves',
+    );
   }
   return acc;
 }

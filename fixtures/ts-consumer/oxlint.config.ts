@@ -6,4 +6,6 @@ import react from '../../dist/react.js';
 
 export default defineConfig({
   extends: [react],
+  // Consumers declare their own ignores; the package cannot ship them.
+  ignorePatterns: ['**/ignored/**'],
 });

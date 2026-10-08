@@ -65,8 +65,16 @@ function reportedRules(output) {
 
 for (const file of ['base.json', 'react.json', 'oxfmt.json']) {
   try {
-    JSON.parse(readFileSync(file, 'utf8'));
+    const parsed = JSON.parse(readFileSync(file, 'utf8'));
     check(true, `${file} is valid JSON`);
+    if (file !== 'oxfmt.json') {
+      // oxlint does not merge ignorePatterns from extends; shipping them would
+      // only mislead consumers into thinking they apply.
+      check(
+        parsed.ignorePatterns === undefined,
+        `${file} ships no ignorePatterns`,
+      );
+    }
   } catch (exception) {
     check(false, `${file} is valid JSON`, String(exception));
   }
@@ -123,16 +131,36 @@ for (const rule of expectedFailures.filter(
 
 // TypeScript consumer: fixtures/ts-consumer/oxlint.config.ts extends dist/react.js.
 // oxlint refuses paths containing "..", so the fail fixtures are copied in.
+// A second copy under src/ignored must stay silent: the consumer config
+// declares ignorePatterns for it, which is the only place oxlint reads them.
 rmSync('fixtures/ts-consumer/src', { recursive: true, force: true });
 cpSync('fixtures/fail', 'fixtures/ts-consumer/src', { recursive: true });
-const tsConsumer = reportedRules(
-  run('npx', ['oxlint', '--format', 'json', 'src'], 'fixtures/ts-consumer')
-    .output,
-);
+cpSync('fixtures/fail', 'fixtures/ts-consumer/src/ignored', {
+  recursive: true,
+});
+const tsConsumerOutput = run(
+  'npx',
+  ['oxlint', '--format', 'json', 'src'],
+  'fixtures/ts-consumer',
+).output;
 rmSync('fixtures/ts-consumer/src', { recursive: true, force: true });
+const tsConsumer = reportedRules(tsConsumerOutput);
 check(tsConsumer !== null, 'oxlint.config.ts consumer produced JSON output');
 for (const rule of expectedFailures) {
   check(tsConsumer?.has(rule), `oxlint.config.ts consumer reports ${rule}`);
 }
+let ignoredHits = 0;
+try {
+  for (const diagnostic of JSON.parse(tsConsumerOutput).diagnostics ?? []) {
+    if (/[\\/]ignored[\\/]/.test(diagnostic.filename)) ignoredHits += 1;
+  }
+} catch {
+  ignoredHits = -1;
+}
+check(
+  ignoredHits === 0,
+  'consumer-root ignorePatterns apply alongside the extended entry',
+  `diagnostics under src/ignored: ${ignoredHits}`,
+);
 
 process.exitCode = failed ? 1 : 0;

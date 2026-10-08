@@ -51,16 +51,18 @@ Use `base` instead of `react` for a project without JSX. Needs the Node-based `o
 
 ### Ignores
 
-The package ships no lint `ignorePatterns`. oxlint resolves them relative to the file that declares them, so patterns inside `node_modules` would never match your tree. oxlint already honours `.gitignore`; add anything else in your root config:
+The package ships no lint `ignorePatterns`. oxlint only honours `ignorePatterns` declared directly in the config file it loads; they are not merged from `extends`, and a nested config does not inherit the root's. So declare them yourself, in every config file oxlint loads:
 
 ```ts
 export default defineConfig({
   extends: [react],
-  ignorePatterns: ['**/dist/**', '**/build/**', '**/generated/**'],
+  ignorePatterns: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/generated/**'],
 });
 ```
 
-In a monorepo, the root config extends `base` and each React app or library has its own `oxlint.config.ts` extending the root plus `react`, the same way oxlint's nested configs work.
+oxlint skips files listed in a `.gitignore` it finds, which usually covers `node_modules`, but keep it in the list so a checkout without `.gitignore` behaves the same.
+
+In a monorepo, the root config extends `base` and each React app or library has its own `oxlint.config.ts` extending the root plus `react`, the same way oxlint's nested configs work. Each nested config repeats the `ignorePatterns` it needs, since they are not inherited (see Ignores).
 
 ### Linting with `.oxlintrc.json`
 
@@ -162,6 +164,7 @@ Prettier's defaults as the ESLint package used them, written out where oxfmt's o
 - `sortImports` on, grouped like `import/order` with `newlines-between: always`: builtins, externals, internal, parent, sibling, index, then type-only imports
 - `useTabs` unset: oxfmt reads `indent_style` from your `.editorconfig`
 - `endOfLine` unset: oxfmt defaults to `lf` and has no `auto`; set `crlf` in your project if you need it
+- `ignorePatterns` for `node_modules`, `dist`, `build` and `generated`. Unlike the lint entries this works because you spread the object into your own config. Setting your own `ignorePatterns` key replaces the list, so extend it: `ignorePatterns: [...edd.ignorePatterns, '.next/**']`
 
 ## Versioning
 
