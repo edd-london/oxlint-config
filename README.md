@@ -47,7 +47,7 @@ export default defineConfig({
 });
 ```
 
-Use `base` instead of `react` for a project without JSX. Needs the Node-based `oxlint` package and Node 22.18+. This is also the route for Yarn PnP projects, which have no `node_modules` folder.
+Use `base` instead of `react` for a project without JSX. Needs the Node-based `oxlint` package and Node 22.18+, and the project needs `"type": "module"` in its `package.json` so Node loads the config as an ES module; use `oxlint.config.mts` and `oxfmt.config.mts` instead if the project is CommonJS. This is also the route for Yarn PnP projects, which have no `node_modules` folder.
 
 ### Ignores
 
