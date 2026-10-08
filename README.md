@@ -150,7 +150,7 @@ Not carried over:
 - The Storybook block: `eslint-plugin-storybook` only works through oxlint's `jsPlugins`, which is alpha. Add it in your project if you need it.
 - Rules oxlint marks as not applicable (`no-dupe-args`, `no-octal`, `react/jsx-uses-react`, `react/jsx-uses-vars`, `react/no-deprecated`, `react/prop-types`): superseded by strict mode, TypeScript, or other rules.
 
-Known divergences, where oxlint's implementation is stricter than the ESLint plugin on code the ESLint config accepted. Both are kept at the ESLint severity; override locally if they bite:
+Known divergences, where oxlint's implementation is stricter than the ESLint plugin on code the ESLint config accepted. Both are set to `warn` instead of the ESLint package's `error` so a first lint run does not fail on working code. They will move to `error` in a major release once oxlint matches the ESLint plugins:
 
 - `unicorn/numeric-separators-style` reports "invalid group length" on fractional digits grouped in threes, such as `51.545_462_146`. The ESLint rule accepts that.
 - `react/display-name` reports components created with `forwardRef` or `memo` and assigned to a named `const`. The ESLint rule accepts that.

@@ -86,7 +86,10 @@ export default defineConfig({
           },
         ],
         'unicorn/no-zero-fractions': 'error',
-        'unicorn/numeric-separators-style': 'error',
+        // Warn, not error: oxlint 1.87 rejects fractional digits grouped in
+        // threes (51.545_462_146), which the ESLint rule accepts. Promote to
+        // error in a major once oxlint matches eslint-plugin-unicorn.
+        'unicorn/numeric-separators-style': 'warn',
         'unicorn/prefer-add-event-listener': 'error',
         'unicorn/prefer-array-find': 'error',
         'unicorn/prefer-array-flat': 'error',

@@ -246,7 +246,7 @@
           }
         ],
         "unicorn/no-zero-fractions": "error",
-        "unicorn/numeric-separators-style": "error",
+        "unicorn/numeric-separators-style": "warn",
         "unicorn/prefer-add-event-listener": "error",
         "unicorn/prefer-array-find": "error",
         "unicorn/prefer-array-flat": "error",
@@ -348,7 +348,7 @@
         "jsx-a11y"
       ],
       "rules": {
-        "react/display-name": "error",
+        "react/display-name": "warn",
         "react/jsx-key": "error",
         "react/jsx-no-comment-textnodes": "error",
         "react/jsx-no-duplicate-props": "error",

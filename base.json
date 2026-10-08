@@ -246,7 +246,7 @@
           }
         ],
         "unicorn/no-zero-fractions": "error",
-        "unicorn/numeric-separators-style": "error",
+        "unicorn/numeric-separators-style": "warn",
         "unicorn/prefer-add-event-listener": "error",
         "unicorn/prefer-array-find": "error",
         "unicorn/prefer-array-flat": "error",

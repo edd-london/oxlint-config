@@ -8,7 +8,10 @@ export default defineConfig({
       files: ['**/*.{jsx,tsx}'],
       plugins: ['react', 'jsx-a11y'],
       rules: {
-        'react/display-name': 'error',
+        // Warn, not error: oxlint 1.87 reports forwardRef and memo components
+        // assigned to a named const, which the ESLint rule accepts. Promote to
+        // error in a major once oxlint matches eslint-plugin-react.
+        'react/display-name': 'warn',
         'react/jsx-key': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-duplicate-props': 'error',
