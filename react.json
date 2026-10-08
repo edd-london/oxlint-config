@@ -61,7 +61,21 @@
         "no-unsafe-optional-chaining": "error",
         "no-unused-labels": "error",
         "no-unused-private-class-members": "error",
-        "no-unused-vars": "error",
+        "no-unused-vars": [
+          "error",
+          {
+            "args": "all",
+            "argsIgnorePattern": "^_",
+            "caughtErrors": "all",
+            "caughtErrorsIgnorePattern": "^_",
+            "destructuredArrayIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
+            "ignoreRestSiblings": true
+          }
+        ],
+        "no-unassigned-vars": "error",
+        "preserve-caught-error": "warn",
+        "no-useless-constructor": "warn",
         "no-useless-backreference": "error",
         "no-useless-catch": "error",
         "no-useless-escape": "error",
@@ -89,7 +103,12 @@
         "typescript"
       ],
       "rules": {
-        "typescript/ban-ts-comment": "error",
+        "typescript/ban-ts-comment": [
+          "error",
+          {
+            "minimumDescriptionLength": 10
+          }
+        ],
         "typescript/no-duplicate-enum-values": "error",
         "typescript/no-empty-object-type": "error",
         "typescript/no-explicit-any": "error",
@@ -300,7 +319,24 @@
         "import"
       ],
       "rules": {
-        "import/no-cycle": "error"
+        "import/no-cycle": "error",
+        "import/no-duplicates": "warn",
+        "import/no-named-as-default": "warn"
+      }
+    },
+    {
+      "files": [
+        "**/*.cjs",
+        "**/*.config.js"
+      ],
+      "plugins": [
+        "typescript",
+        "unicorn"
+      ],
+      "rules": {
+        "typescript/no-require-imports": "off",
+        "unicorn/prefer-module": "off",
+        "unicorn/prefer-export-from": "off"
       }
     },
     {
@@ -327,8 +363,20 @@
         "react/no-string-refs": "error",
         "react/no-unescaped-entities": "error",
         "react/no-unknown-property": "error",
-        "react/no-unsafe": "off",
+        "react/no-unsafe": "warn",
         "react/react-in-jsx-scope": "off",
+        "react/void-dom-elements-no-children": "error",
+        "react/jsx-no-script-url": "warn",
+        "react/iframe-missing-sandbox": "warn",
+        "react/no-array-index-key": "warn",
+        "react/no-danger": "warn",
+        "react/jsx-curly-brace-presence": [
+          "warn",
+          {
+            "props": "never",
+            "children": "never"
+          }
+        ],
         "jsx-a11y/alt-text": "error",
         "jsx-a11y/anchor-ambiguous-text": "off",
         "jsx-a11y/anchor-has-content": "error",

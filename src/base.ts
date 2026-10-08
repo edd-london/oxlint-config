@@ -22,4 +22,17 @@ export default defineConfig({
     '**/generated/**',
   ],
   extends: [eslint, typescript, unicorn, importPlugin],
+  overrides: [
+    {
+      // CommonJS config files are a fact of life in every project (from the
+      // website and edd-ui). Projects with CommonJS elsewhere widen the glob.
+      files: ['**/*.cjs', '**/*.config.js'],
+      plugins: ['typescript', 'unicorn'],
+      rules: {
+        'typescript/no-require-imports': 'off',
+        'unicorn/prefer-module': 'off',
+        'unicorn/prefer-export-from': 'off',
+      },
+    },
+  ],
 });

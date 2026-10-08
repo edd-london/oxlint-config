@@ -57,7 +57,24 @@ export default defineConfig({
         'no-unsafe-optional-chaining': 'error',
         'no-unused-labels': 'error',
         'no-unused-private-class-members': 'error',
-        'no-unused-vars': 'error',
+        // Underscore and rest-sibling exceptions: nexus and the website chose
+        // the same options independently.
+        'no-unused-vars': [
+          'error',
+          {
+            args: 'all',
+            argsIgnorePattern: '^_',
+            caughtErrors: 'all',
+            caughtErrorsIgnorePattern: '^_',
+            destructuredArrayIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
+            ignoreRestSiblings: true,
+          },
+        ],
+        // @eslint/js 10 recommended additions, adopted from nexus.
+        'no-unassigned-vars': 'error',
+        'preserve-caught-error': 'warn',
+        'no-useless-constructor': 'warn',
         'no-useless-backreference': 'error',
         'no-useless-catch': 'error',
         'no-useless-escape': 'error',

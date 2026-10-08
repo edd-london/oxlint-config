@@ -9,6 +9,9 @@ export default defineConfig({
       plugins: ['import'],
       rules: {
         'import/no-cycle': 'error',
+        // Advisory additions from nexus.
+        'import/no-duplicates': 'warn',
+        'import/no-named-as-default': 'warn',
       },
     },
   ],

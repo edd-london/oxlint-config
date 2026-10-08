@@ -115,6 +115,20 @@ Translated from `@eddlondon/eslint-config-react` 5 with `@oxlint/migrate`, pinne
 
 `categories.correctness` is set to `off` so that only the listed rules run. This keeps the rule set identical to the ESLint package instead of picking up oxlint's own defaults.
 
+Additions beyond the ESLint package, taken from EDD projects already on oxlint where every project had made the same choice or the rule is uncontroversial:
+
+| Entry | Addition | Severity |
+| --- | --- | --- |
+| base | `no-unused-vars` ignores `_`-prefixed names and rest siblings | error (options only) |
+| base | `no-unassigned-vars`, `preserve-caught-error` (`@eslint/js` 10 recommended) | error, warn |
+| base | `no-useless-constructor` | warn |
+| base | `typescript/ban-ts-comment` requires a description of 10+ characters | error (options only) |
+| base | `import/no-duplicates`, `import/no-named-as-default` | warn |
+| base | `*.cjs` and `*.config.js`: `prefer-module`, `prefer-export-from`, `no-require-imports` off | override |
+| react | `react/void-dom-elements-no-children` | error |
+| react | `react/jsx-no-script-url`, `react/iframe-missing-sandbox`, `react/no-unsafe` | warn |
+| react | `react/no-array-index-key`, `react/no-danger`, `react/jsx-curly-brace-presence` | warn |
+
 Not carried over:
 
 - `import/order`: not implemented in oxlint. `sortImports` in the oxfmt config replaces it.

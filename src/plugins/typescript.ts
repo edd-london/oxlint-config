@@ -9,7 +9,11 @@ export default defineConfig({
       files: ['**/*.{js,jsx,ts,tsx,mjs,cjs}'],
       plugins: ['typescript'],
       rules: {
-        'typescript/ban-ts-comment': 'error',
+        // A @ts-expect-error needs a real reason next to it (from nexus).
+        'typescript/ban-ts-comment': [
+          'error',
+          { minimumDescriptionLength: 10 },
+        ],
         'typescript/no-duplicate-enum-values': 'error',
         'typescript/no-empty-object-type': 'error',
         'typescript/no-explicit-any': 'error',

@@ -16,6 +16,13 @@ const expectedFailures = [
   'array-callback-return',
   'react/jsx-key',
   'jsx-a11y/alt-text',
+  // Step 4 additions.
+  'no-useless-constructor',
+  'import/no-duplicates',
+  'typescript/ban-ts-comment',
+  'react/void-dom-elements-no-children',
+  'react/no-array-index-key',
+  'react/jsx-curly-brace-presence',
 ];
 
 function run(command, args, cwd = process.cwd()) {
