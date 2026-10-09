@@ -1,9 +1,11 @@
-import { defineConfig } from 'oxlint';
+import { defineConfig, type OxlintConfig } from 'oxlint';
 
 // eslint-plugin-unicorn 61 recommended with the eslint-config-react 5 overrides:
 // no-null off, filename-case kebab or pascal, catch-error-name `exception`,
 // no-useless-undefined without arguments. prevent-abbreviations was already off.
-export default defineConfig({
+// Annotated with oxlint's own type so the published .d.ts is a type
+// reference, not every rule of every entry this one extends.
+const config: OxlintConfig = defineConfig({
   overrides: [
     {
       files: ['**/*.{js,jsx,ts,tsx,mjs,cjs}'],
@@ -156,3 +158,5 @@ export default defineConfig({
     },
   ],
 });
+
+export default config;

@@ -1,9 +1,11 @@
-import { defineConfig } from 'oxlint';
+import { defineConfig, type OxlintConfig } from 'oxlint';
 
 // typescript-eslint recommended, as eslint-config-react 5 applied it. The second
 // block is its eslint-recommended override: checks TypeScript already performs are
 // switched off and the es-module rules switched on.
-export default defineConfig({
+// Annotated with oxlint's own type so the published .d.ts is a type
+// reference, not every rule of every entry this one extends.
+const config: OxlintConfig = defineConfig({
   overrides: [
     {
       files: ['**/*.{js,jsx,ts,tsx,mjs,cjs}'],
@@ -61,3 +63,5 @@ export default defineConfig({
     },
   ],
 });
+
+export default config;

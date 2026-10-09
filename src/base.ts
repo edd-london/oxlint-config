@@ -1,4 +1,4 @@
-import { defineConfig } from 'oxlint';
+import { defineConfig, type OxlintConfig } from 'oxlint';
 
 import eslint from './plugins/eslint.js';
 import importPlugin from './plugins/import.js';
@@ -17,7 +17,10 @@ import unicorn from './plugins/unicorn.js';
 //   import { defineConfig } from 'oxlint';
 //   import base from '@eddlondon/oxlint-config/base';
 //   export default defineConfig({ extends: [base] });
-export default defineConfig({
+//
+// Annotated with oxlint's own type so the published .d.ts is a type
+// reference, not every rule of every entry this one extends.
+const config: OxlintConfig = defineConfig({
   categories: { correctness: 'off' },
   env: { builtin: true },
   extends: [eslint, typescript, unicorn, importPlugin],
@@ -35,3 +38,5 @@ export default defineConfig({
     },
   ],
 });
+
+export default config;

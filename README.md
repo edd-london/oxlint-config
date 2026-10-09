@@ -97,7 +97,7 @@ export default defineConfig({
 });
 ```
 
-`nextjs` is `react` plus the 21 rules of oxlint's built-in `nextjs` plugin at the severities of `@next/eslint-plugin-next`'s `recommended` and `core-web-vitals` presets. The package turns oxlint's rule categories off, so adding `plugins: ['nextjs']` yourself would enable nothing; this entry lists the rules. If the app uses styled-jsx, add the override from the previous section.
+`nextjs` is `react` plus the 21 rules of oxlint's built-in `nextjs` plugin at the severities of `@next/eslint-plugin-next`'s `recommended` and `core-web-vitals` presets. Two rules, `no-html-link-for-pages` and `no-sync-scripts`, are errors rather than the warn the Next docs table shows because `core-web-vitals` promotes them. The package turns oxlint's rule categories off, so adding `plugins: ['nextjs']` yourself would enable nothing; this entry lists the rules. If the app uses styled-jsx, add the override from the previous section.
 
 ### Ignores
 

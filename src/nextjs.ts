@@ -1,4 +1,4 @@
-import { defineConfig } from 'oxlint';
+import { defineConfig, type OxlintConfig } from 'oxlint';
 
 import nextjs from './plugins/nextjs.js';
 import react from './react.js';
@@ -9,6 +9,11 @@ import react from './react.js';
 //   import { defineConfig } from 'oxlint';
 //   import nextjs from '@eddlondon/oxlint-config/nextjs';
 //   export default defineConfig({ extends: [nextjs] });
-export default defineConfig({
+//
+// Annotated with oxlint's own type so the published .d.ts is a type
+// reference, not every rule of every entry this one extends.
+const config: OxlintConfig = defineConfig({
   extends: [react, nextjs],
 });
+
+export default config;

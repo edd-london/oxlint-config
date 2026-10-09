@@ -1,8 +1,10 @@
-import { defineConfig } from 'oxlint';
+import { defineConfig, type OxlintConfig } from 'oxlint';
 
 // eslint-plugin-react recommended, eslint-plugin-react-hooks 5 recommended and
 // eslint-plugin-jsx-a11y recommended, as eslint-config-react 5 applied them.
-export default defineConfig({
+// Annotated with oxlint's own type so the published .d.ts is a type
+// reference, not every rule of every entry this one extends.
+const config: OxlintConfig = defineConfig({
   overrides: [
     {
       files: ['**/*.{jsx,tsx}'],
@@ -176,3 +178,5 @@ export default defineConfig({
     },
   ],
 });
+
+export default config;

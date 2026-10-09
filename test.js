@@ -27,10 +27,7 @@ const expectedFailures = [
 ];
 
 // Only the nextjs entry reports these; oxlint codes them as next(...).
-const expectedNextFailures = [
-  'next/no-img-element',
-  'next/no-sync-scripts',
-];
+const expectedNextFailures = ['next/no-img-element', 'next/no-sync-scripts'];
 
 function run(command, args, cwd = process.cwd()) {
   const result = spawnSync(command, args, {
@@ -202,5 +199,17 @@ check(
   'consumer-root ignorePatterns apply alongside the extended entry',
   `diagnostics under src/ignored: ${ignoredHits}`,
 );
+
+// The entries are annotated with oxlint's OxlintConfig type so each .d.ts is
+// a type reference. Without that, every entry inlines the rules of every
+// entry it extends and the files compound with each new entry.
+for (const file of ['base', 'react', 'nextjs']) {
+  const lines = readFileSync(`dist/${file}.d.ts`, 'utf8').split('\n').length;
+  check(
+    lines <= 10,
+    `dist/${file}.d.ts stays a type reference`,
+    `${lines} lines`,
+  );
+}
 
 process.exitCode = failed ? 1 : 0;

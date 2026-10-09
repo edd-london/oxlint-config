@@ -1,9 +1,11 @@
-import { defineConfig } from 'oxlint';
+import { defineConfig, type OxlintConfig } from 'oxlint';
 
 // oxlint's built-in port of @next/eslint-plugin-next, at the severities of its
 // `recommended` and `core-web-vitals` presets. Scoped to an override, like the
 // other plugin modules, so it stays self-contained when extended.
-export default defineConfig({
+// Annotated with oxlint's own type so the published .d.ts is a type
+// reference, not every rule of every entry this one extends.
+const config: OxlintConfig = defineConfig({
   overrides: [
     {
       files: ['**/*.{js,jsx,ts,tsx,mjs,cjs}'],
@@ -21,6 +23,8 @@ export default defineConfig({
         'nextjs/no-duplicate-head': 'error',
         'nextjs/no-head-element': 'warn',
         'nextjs/no-head-import-in-document': 'error',
+        // Error, not warn: `core-web-vitals` promotes this and no-sync-scripts
+        // from `recommended`'s warn.
         'nextjs/no-html-link-for-pages': 'error',
         'nextjs/no-img-element': 'warn',
         'nextjs/no-page-custom-font': 'warn',
@@ -34,3 +38,5 @@ export default defineConfig({
     },
   ],
 });
+
+export default config;

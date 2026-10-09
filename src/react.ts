@@ -1,4 +1,4 @@
-import { defineConfig } from 'oxlint';
+import { defineConfig, type OxlintConfig } from 'oxlint';
 
 import base from './base.js';
 import react from './plugins/react.js';
@@ -9,6 +9,11 @@ import react from './plugins/react.js';
 //   import { defineConfig } from 'oxlint';
 //   import react from '@eddlondon/oxlint-config/react';
 //   export default defineConfig({ extends: [react] });
-export default defineConfig({
+//
+// Annotated with oxlint's own type so the published .d.ts is a type
+// reference, not every rule of every entry this one extends.
+const config: OxlintConfig = defineConfig({
   extends: [base, react],
 });
+
+export default config;

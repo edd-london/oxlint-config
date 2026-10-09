@@ -1,8 +1,10 @@
-import { defineConfig } from 'oxlint';
+import { defineConfig, type OxlintConfig } from 'oxlint';
 
 // eslint-plugin-import as eslint-config-react 5 used it. import/order is not in
 // oxlint; oxfmt sortImports replaces it.
-export default defineConfig({
+// Annotated with oxlint's own type so the published .d.ts is a type
+// reference, not every rule of every entry this one extends.
+const config: OxlintConfig = defineConfig({
   overrides: [
     {
       files: ['**/*.{js,jsx,ts,tsx,mjs,cjs}'],
@@ -16,3 +18,5 @@ export default defineConfig({
     },
   ],
 });
+
+export default config;
