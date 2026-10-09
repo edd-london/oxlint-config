@@ -1,6 +1,6 @@
 {
   "name": "@eddlondon/oxlint-config",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "EDD London's shared oxlint and oxfmt configuration: the oxlint version of @eddlondon/eslint-config-react.",
   "keywords": [
     "config",
@@ -24,7 +24,8 @@
     "react.json",
     "nextjs.json",
     "oxfmt.json",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "type": "module",
   "exports": {

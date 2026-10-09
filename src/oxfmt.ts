@@ -1,4 +1,4 @@
-import { defineConfig } from 'oxfmt';
+import { defineConfig, type OxfmtConfig } from 'oxfmt';
 
 // Prettier's defaults as @eddlondon/eslint-config-react 5 used them, spelled
 // out where oxfmt's defaults differ. `useTabs` is unset so .editorconfig
@@ -6,7 +6,10 @@ import { defineConfig } from 'oxfmt';
 //
 //   import edd from '@eddlondon/oxlint-config/oxfmt';
 //   export default defineConfig({ ...edd, endOfLine: 'lf' });
-export default defineConfig({
+//
+// Typed as OxfmtConfig for a small .d.ts; ignorePatterns stays required so
+// consumers can spread it.
+const config: OxfmtConfig & { ignorePatterns: string[] } = defineConfig({
   printWidth: 80,
   tabWidth: 2,
   semi: true,
@@ -34,3 +37,5 @@ export default defineConfig({
     '**/generated/**',
   ],
 });
+
+export default config;

@@ -278,7 +278,7 @@ Prettier's defaults as the ESLint package used them, written out where oxfmt's o
 
 ## Versioning
 
-Semver. A rule moving from off to error or warn to error is a major release. New rules land as warnings in minors.
+Semver. A rule moving from off to error or warn to error is a major release. New entries and new rules at warn land in minors. Every release has an entry in [CHANGELOG.md](./CHANGELOG.md), which ships in the package.
 
 ## Development
 

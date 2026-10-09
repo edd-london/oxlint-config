@@ -6,7 +6,8 @@
 //     nextjs rule;
 //  5. an `oxlint.config.ts` consumer of the compiled entry sees the same
 //     findings as the JSON twin, and its own ignorePatterns apply;
-//  6. the published .d.ts files stay type references.
+//  6. the published .d.ts files stay type references;
+//  7. CHANGELOG.md has an entry for the version being released.
 import { spawnSync } from 'node:child_process';
 import { cpSync, readFileSync, rmSync } from 'node:fs';
 
@@ -202,7 +203,7 @@ check(
 
 // Entries are typed as OxlintConfig; without that each .d.ts inlines every
 // rule of every entry it extends.
-for (const file of ['base', 'react', 'nextjs']) {
+for (const file of ['base', 'react', 'nextjs', 'oxfmt']) {
   const lines = readFileSync(`dist/${file}.d.ts`, 'utf8').split('\n').length;
   check(
     lines <= 10,
@@ -210,5 +211,12 @@ for (const file of ['base', 'react', 'nextjs']) {
     `${lines} lines`,
   );
 }
+
+// A release needs a changelog entry; prepublishOnly runs this.
+const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
+check(
+  readFileSync('CHANGELOG.md', 'utf8').includes(`\n## [${version}] - `),
+  `CHANGELOG.md has an entry for ${version}`,
+);
 
 process.exitCode = failed ? 1 : 0;
