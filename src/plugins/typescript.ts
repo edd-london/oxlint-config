@@ -1,17 +1,14 @@
 import { defineConfig, type OxlintConfig } from 'oxlint';
 
-// typescript-eslint recommended, as eslint-config-react 5 applied it. The second
-// block is its eslint-recommended override: checks TypeScript already performs are
-// switched off and the es-module rules switched on.
-// Annotated with oxlint's own type so the published .d.ts is a type
-// reference, not every rule of every entry this one extends.
+// typescript-eslint recommended, as eslint-config-react 5 applied it. The
+// second block is its eslint-recommended override for TypeScript files.
 const config: OxlintConfig = defineConfig({
   overrides: [
     {
       files: ['**/*.{js,jsx,ts,tsx,mjs,cjs}'],
       plugins: ['typescript'],
       rules: {
-        // A @ts-expect-error needs a real reason next to it (from nexus).
+        // A @ts-expect-error needs a real reason next to it.
         'typescript/ban-ts-comment': [
           'error',
           { minimumDescriptionLength: 10 },

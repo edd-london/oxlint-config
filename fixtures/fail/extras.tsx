@@ -1,4 +1,4 @@
-// Expected findings for the step 4 additions:
+// Expected findings for the additions beyond the ESLint package:
 //   import/no-duplicates                  (two imports from 'react')
 //   no-useless-constructor
 //   typescript/ban-ts-comment             (description under 10 characters)

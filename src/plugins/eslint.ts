@@ -1,8 +1,6 @@
 import { defineConfig, type OxlintConfig } from 'oxlint';
 
 // @eslint/js recommended, as eslint-config-react 5 applied it.
-// Annotated with oxlint's own type so the published .d.ts is a type
-// reference, not every rule of every entry this one extends.
 const config: OxlintConfig = defineConfig({
   overrides: [
     {
@@ -59,8 +57,7 @@ const config: OxlintConfig = defineConfig({
         'no-unsafe-optional-chaining': 'error',
         'no-unused-labels': 'error',
         'no-unused-private-class-members': 'error',
-        // Underscore and rest-sibling exceptions: nexus and the website chose
-        // the same options independently.
+        // Ignore `_`-prefixed names and rest siblings.
         'no-unused-vars': [
           'error',
           {
@@ -73,7 +70,7 @@ const config: OxlintConfig = defineConfig({
             ignoreRestSiblings: true,
           },
         ],
-        // @eslint/js 10 recommended additions, adopted from nexus.
+        // Added in @eslint/js 10 recommended.
         'no-unassigned-vars': 'error',
         'preserve-caught-error': 'warn',
         'no-useless-constructor': 'warn',

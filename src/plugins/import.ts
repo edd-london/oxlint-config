@@ -1,9 +1,7 @@
 import { defineConfig, type OxlintConfig } from 'oxlint';
 
-// eslint-plugin-import as eslint-config-react 5 used it. import/order is not in
-// oxlint; oxfmt sortImports replaces it.
-// Annotated with oxlint's own type so the published .d.ts is a type
-// reference, not every rule of every entry this one extends.
+// eslint-plugin-import as eslint-config-react 5 used it. `import/order` has
+// no oxlint equivalent; oxfmt's `sortImports` replaces it.
 const config: OxlintConfig = defineConfig({
   overrides: [
     {
@@ -11,7 +9,7 @@ const config: OxlintConfig = defineConfig({
       plugins: ['import'],
       rules: {
         'import/no-cycle': 'error',
-        // Advisory additions from nexus.
+        // Additions beyond the ESLint package, advisory only.
         'import/no-duplicates': 'warn',
         'import/no-named-as-default': 'warn',
       },

@@ -1,7 +1,6 @@
-// Writes base.json, react.json, nextjs.json and oxfmt.json from the compiled entries, for
-// projects that use .oxlintrc.json / .oxfmtrc.json instead of a TypeScript
-// config. oxlint's JSON `extends` takes file paths only, so the object-based
-// `extends` chain is flattened here into one self-contained config per entry.
+// Writes the JSON twin of each compiled entry for projects on .oxlintrc.json
+// or .oxfmtrc.json. oxlint's JSON `extends` takes file paths only, so each
+// entry's `extends` chain is flattened into one self-contained config.
 import { writeFileSync } from 'node:fs';
 
 import base from '../dist/base.js';
@@ -16,7 +15,7 @@ const OXFMT_SCHEMA =
 
 const union = (a = [], b = []) => [...new Set([...a, ...b])];
 
-// Later configs win, the same order oxlint applies `extends` in.
+// Later configs win, as in oxlint's own `extends` handling.
 function flatten(config) {
   const parents = (config.extends ?? []).map((parent) => flatten(parent));
   const { extends: _ignored, ...own } = config;
@@ -32,8 +31,8 @@ function flatten(config) {
       overrides: [...(acc.overrides ?? []), ...(c.overrides ?? [])],
     };
   }
-  // oxlint does not merge ignorePatterns from `extends`, so a shared config
-  // cannot carry them. Refuse to flatten one rather than ship it silently.
+  // oxlint never reads ignorePatterns through `extends`; refuse rather than
+  // ship ones that would not apply.
   if (acc.ignorePatterns) {
     throw new Error(
       'ignorePatterns found in a lint entry; consumers must declare ignores themselves',
@@ -43,7 +42,7 @@ function flatten(config) {
 }
 
 function tidy(flat) {
-  // Drop keys the flattening left empty so the file reads like a hand-written one.
+  // Drop keys the flattening left empty.
   const out = { $schema: OXLINT_SCHEMA };
   for (const [key, value] of Object.entries(flat)) {
     const empty =

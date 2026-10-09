@@ -1,18 +1,15 @@
 import { defineConfig, type OxlintConfig } from 'oxlint';
 
-// eslint-plugin-react recommended, eslint-plugin-react-hooks 5 recommended and
-// eslint-plugin-jsx-a11y recommended, as eslint-config-react 5 applied them.
-// Annotated with oxlint's own type so the published .d.ts is a type
-// reference, not every rule of every entry this one extends.
+// eslint-plugin-react, react-hooks 5 and jsx-a11y recommended, as
+// eslint-config-react 5 applied them.
 const config: OxlintConfig = defineConfig({
   overrides: [
     {
       files: ['**/*.{jsx,tsx}'],
       plugins: ['react', 'jsx-a11y'],
       rules: {
-        // Warn, not error: oxlint 1.87 reports forwardRef and memo components
-        // assigned to a named const, which the ESLint rule accepts. Promote to
-        // error in a major once oxlint matches eslint-plugin-react.
+        // Warn until oxlint matches the ESLint rule, which accepts forwardRef
+        // and memo components assigned to a named const. Promoting is a major.
         'react/display-name': 'warn',
         'react/jsx-key': 'error',
         'react/jsx-no-comment-textnodes': 'error',
@@ -30,8 +27,8 @@ const config: OxlintConfig = defineConfig({
         'react/no-unknown-property': 'error',
         'react/no-unsafe': 'warn',
         'react/react-in-jsx-scope': 'off',
-        // Additions from nexus: correctness and security as error or warn,
-        // style and perf as warn.
+        // Additions beyond the ESLint package: correctness and security as
+        // error or warn, style and perf as warn.
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-script-url': 'warn',
         'react/iframe-missing-sandbox': 'warn',

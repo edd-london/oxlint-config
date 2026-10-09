@@ -1,4 +1,6 @@
-// Trips nextjs/no-img-element and nextjs/no-sync-scripts under the nextjs entry.
+// Expected under nextjs only:
+//   next/no-img-element
+//   next/no-sync-scripts
 export const NextPage = () => (
   <main>
     <img src="/hero.png" alt="Hero" />

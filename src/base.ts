@@ -6,28 +6,25 @@ import typescript from './plugins/typescript.js';
 import unicorn from './plugins/unicorn.js';
 
 // Framework-free entry: the eslint, typescript, unicorn and import rules of
-// @eddlondon/eslint-config-react 5. Every rule is listed explicitly and
-// `correctness` is off, so oxlint's own defaults never leak in.
+// @eddlondon/eslint-config-react 5. Every rule is listed and `correctness` is
+// off, so oxlint's own defaults never apply.
 //
-// No `ignorePatterns` here on purpose: oxlint 1.87 only honours ignorePatterns
-// declared directly in the config it loads. They are not merged from `extends`
-// (object or file), and nested configs do not inherit the root's either.
-// Consumers set ignores in every config file oxlint loads.
+// No `ignorePatterns`: oxlint reads them only from the config file it loads,
+// never from `extends` or a parent config. Consumers declare their own.
 //
-//   import { defineConfig } from 'oxlint';
+// Entries are typed as `OxlintConfig` so the published .d.ts is a type
+// reference instead of every rule of every extended entry.
+//
 //   import base from '@eddlondon/oxlint-config/base';
 //   export default defineConfig({ extends: [base] });
-//
-// Annotated with oxlint's own type so the published .d.ts is a type
-// reference, not every rule of every entry this one extends.
 const config: OxlintConfig = defineConfig({
   categories: { correctness: 'off' },
   env: { builtin: true },
   extends: [eslint, typescript, unicorn, importPlugin],
   overrides: [
     {
-      // CommonJS config files are a fact of life in every project (from the
-      // website and edd-ui). Projects with CommonJS elsewhere widen the glob.
+      // Every project has CommonJS config files. Widen the glob locally if
+      // CommonJS lives elsewhere too.
       files: ['**/*.cjs', '**/*.config.js'],
       plugins: ['typescript', 'unicorn'],
       rules: {

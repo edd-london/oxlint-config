@@ -1,11 +1,9 @@
 import { defineConfig } from 'oxfmt';
 
-// Prettier's defaults as @eddlondon/eslint-config-react 5 used them, written
-// out where oxfmt's own defaults differ. `useTabs` and `endOfLine` are left
-// unset on purpose: oxfmt reads indent style from the project's .editorconfig,
-// and line endings are a per-project choice (oxfmt has no `auto`).
+// Prettier's defaults as @eddlondon/eslint-config-react 5 used them, spelled
+// out where oxfmt's defaults differ. `useTabs` is unset so .editorconfig
+// decides; `endOfLine` is unset because oxfmt has no `auto`.
 //
-//   import { defineConfig } from 'oxfmt';
 //   import edd from '@eddlondon/oxlint-config/oxfmt';
 //   export default defineConfig({ ...edd, endOfLine: 'lf' });
 export default defineConfig({

@@ -1,10 +1,8 @@
 import { defineConfig, type OxlintConfig } from 'oxlint';
 
-// eslint-plugin-unicorn 61 recommended with the eslint-config-react 5 overrides:
-// no-null off, filename-case kebab or pascal, catch-error-name `exception`,
-// no-useless-undefined without arguments. prevent-abbreviations was already off.
-// Annotated with oxlint's own type so the published .d.ts is a type
-// reference, not every rule of every entry this one extends.
+// eslint-plugin-unicorn 61 recommended with the eslint-config-react 5
+// overrides: no-null off, filename-case kebab or pascal, catch-error-name
+// `exception`, no-useless-undefined without arguments.
 const config: OxlintConfig = defineConfig({
   overrides: [
     {
@@ -88,9 +86,8 @@ const config: OxlintConfig = defineConfig({
           },
         ],
         'unicorn/no-zero-fractions': 'error',
-        // Warn, not error: oxlint 1.87 rejects fractional digits grouped in
-        // threes (51.545_462_146), which the ESLint rule accepts. Promote to
-        // error in a major once oxlint matches eslint-plugin-unicorn.
+        // Warn until oxlint matches the ESLint rule, which accepts fractional
+        // digits grouped in threes (51.545_462_146). Promoting is a major.
         'unicorn/numeric-separators-style': 'warn',
         'unicorn/prefer-add-event-listener': 'error',
         'unicorn/prefer-array-find': 'error',

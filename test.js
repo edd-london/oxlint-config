@@ -1,11 +1,12 @@
-// Package self-check, run by `npm test` after the build.
-//  1. The generated JSON files parse.
-//  2. fixtures/pass lints clean under `react` and formats clean under oxfmt.
-//  3. fixtures/fail reports every rule it is written to trip under `react`.
-//  4. `base` reports no react or jsx-a11y rule at all: the split holds, and
-//     only `nextjs` reports nextjs rules.
-//  5. A TypeScript consumer (`oxlint.config.ts` extending the compiled entry)
-//     sees the same findings as the JSON twin.
+// Package self-check, run by `npm test` after the build:
+//  1. the generated JSON parses;
+//  2. fixtures/pass lints and formats clean;
+//  3. fixtures/fail trips every rule it is written for, under each entry;
+//  4. `base` reports no react, jsx-a11y or nextjs rule, and `react` no
+//     nextjs rule;
+//  5. an `oxlint.config.ts` consumer of the compiled entry sees the same
+//     findings as the JSON twin, and its own ignorePatterns apply;
+//  6. the published .d.ts files stay type references.
 import { spawnSync } from 'node:child_process';
 import { cpSync, readFileSync, rmSync } from 'node:fs';
 
@@ -17,7 +18,7 @@ const expectedFailures = [
   'array-callback-return',
   'react/jsx-key',
   'jsx-a11y/alt-text',
-  // Step 4 additions.
+  // Additions beyond the ESLint package.
   'no-useless-constructor',
   'import/no-duplicates',
   'typescript/ban-ts-comment',
@@ -26,7 +27,7 @@ const expectedFailures = [
   'react/jsx-curly-brace-presence',
 ];
 
-// Only the nextjs entry reports these; oxlint codes them as next(...).
+// Only the nextjs entry reports these. oxlint codes them as next(...).
 const expectedNextFailures = ['next/no-img-element', 'next/no-sync-scripts'];
 
 function run(command, args, cwd = process.cwd()) {
@@ -50,7 +51,7 @@ function check(ok, label, detail = '') {
   }
 }
 
-// oxlint codes look like `unicorn(filename-case)` or `eslint(no-var)`.
+// Diagnostic codes look like `unicorn(filename-case)` or `eslint(no-var)`.
 function reportedRules(output) {
   const rules = new Set();
   try {
@@ -72,8 +73,7 @@ for (const file of ['base.json', 'react.json', 'nextjs.json', 'oxfmt.json']) {
     const parsed = JSON.parse(readFileSync(file, 'utf8'));
     check(true, `${file} is valid JSON`);
     if (file !== 'oxfmt.json') {
-      // oxlint does not merge ignorePatterns from extends; shipping them would
-      // only mislead consumers into thinking they apply.
+      // Shipped ignorePatterns would never apply; see src/base.ts.
       check(
         parsed.ignorePatterns === undefined,
         `${file} ships no ignorePatterns`,
@@ -166,10 +166,10 @@ for (const rule of expectedFailures.filter(
   check(baseFail?.has(rule), `base reports ${rule}`);
 }
 
-// TypeScript consumer: fixtures/ts-consumer/oxlint.config.ts extends dist/react.js.
-// oxlint refuses paths containing "..", so the fail fixtures are copied in.
-// A second copy under src/ignored must stay silent: the consumer config
-// declares ignorePatterns for it, which is the only place oxlint reads them.
+// TypeScript consumer: fixtures/ts-consumer/oxlint.config.ts extends
+// dist/react.js. oxlint refuses ".." paths, so the fail fixtures are copied
+// in. The copy under src/ignored must stay silent: the consumer config
+// ignores it.
 rmSync('fixtures/ts-consumer/src', { recursive: true, force: true });
 cpSync('fixtures/fail', 'fixtures/ts-consumer/src', { recursive: true });
 cpSync('fixtures/fail', 'fixtures/ts-consumer/src/ignored', {
@@ -200,9 +200,8 @@ check(
   `diagnostics under src/ignored: ${ignoredHits}`,
 );
 
-// The entries are annotated with oxlint's OxlintConfig type so each .d.ts is
-// a type reference. Without that, every entry inlines the rules of every
-// entry it extends and the files compound with each new entry.
+// Entries are typed as OxlintConfig; without that each .d.ts inlines every
+// rule of every entry it extends.
 for (const file of ['base', 'react', 'nextjs']) {
   const lines = readFileSync(`dist/${file}.d.ts`, 'utf8').split('\n').length;
   check(
